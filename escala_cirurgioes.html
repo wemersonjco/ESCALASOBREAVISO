@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escala de Sobreaviso - Cirurgiões 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .month-section {
+            margin-bottom: 40px;
+        }
+        
+        .month-title {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 20px;
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .day-header {
+            background: #34495e;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .day-cell {
+            background: white;
+            padding: 12px 8px;
+            text-align: center;
+            border-right: 1px solid #ecf0f1;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .day-cell:last-child {
+            border-right: none;
+        }
+        
+        .date {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .doctor {
+            font-size: 12px;
+            color: #e74c3c;
+            font-weight: bold;
+            background: #ffeaa7;
+            padding: 3px 5px;
+            border-radius: 4px;
+            margin-top: 3px;
+        }
+        
+        .weekend {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+        
+        .weekend .doctor {
+            background: #ddd;
+            color: #555;
+        }
+        
+        .empty-cell {
+            background: #f8f9fa;
+        }
+        
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .legend h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .legend-item {
+            margin: 8px 0;
+            color: #555;
+        }
+        
+        @media (max-width: 768px) {
+            .week-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .day-cell {
+                border-right: none;
+                border-bottom: 1px solid #ecf0f1;
+            }
+            
+            .day-header {
+                display: none;
+            }
+            
+            .date::before {
+                content: attr(data-day) " - ";
+                font-weight: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Escala de Sobreaviso - Cirurgiões 2025</h1>
+        
+        <div id="schedule-container"></div>
+        
+        <div class="legend">
+            <h3>Informações da Escala</h3>
+            <div class="legend-item"><strong>Período:</strong> Segunda a Quinta-feira (escala quinzenal)</div>
+            <div class="legend-item"><strong>Sexta, Sábado e Domingo:</strong> Escala Específica de Final de Semana</div>
+            <div class="legend-item"><strong>Rodízio:</strong> Cada dupla alterna semanalmente no mesmo dia da semana</div>
+            <div class="legend-item">
+                <strong>Distribuição:</strong><br>
+                • Segunda-feira: KAWAY / BERTHOLDO<br>
+                • Terça-feira: BRUNA / WEMERSON<br>
+                • Quarta-feira: IVANA / CAROL<br>
+                • Quinta-feira: DJULLIAN / THIAGO
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração da escala
+        const doctors = {
+            1: ['KAWAY', 'BERTHOLDO'],        // Segunda
+            2: ['BRUNA', 'WEMERSON'],        // Terça
+            3: ['IVANA', 'CAROL'],           // Quarta
+            4: ['DJULLIAN', 'THIAGO']        // Quinta
+        };
+
+        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const monthNames = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+
+        function getWeekNumber(date) {
+            const startDate = new Date(2025, 6, 21); // 21/07/2025
+            const diffTime = date - startDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            return Math.floor(diffDays / 7);
+        }
+
+        function getDoctorForDate(date) {
+            const dayOfWeek = date.getDay();
+            
+            // Fins de semana
+            if (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) {
+                return 'ESCALA ESPECÍFICA';
+            }
+            
+            // Segunda a quinta
+            if (dayOfWeek >= 1 && dayOfWeek <= 4) {
+                const weekNumber = getWeekNumber(date);
+                const doctorIndex = weekNumber % 2;
+                return doctors[dayOfWeek][doctorIndex];
+            }
+            
+            return '';
+        }
+
+        function generateCalendar() {
+            const container = document.getElementById('schedule-container');
+            const startDate = new Date(2025, 6, 21); // 21/07/2025
+            const endDate = new Date(2025, 11, 31); // 31/12/2025
+            
+            let currentDate = new Date(startDate);
+            let currentMonth = currentDate.getMonth();
+            
+            while (currentDate <= endDate) {
+                if (currentDate.getMonth() !== currentMonth) {
+                    currentMonth = currentDate.getMonth();
+                }
+                
+                // Criar seção do mês
+                const monthSection = document.createElement('div');
+                monthSection.className = 'month-section';
+                
+                const monthTitle = document.createElement('div');
+                monthTitle.className = 'month-title';
+                monthTitle.textContent = `${monthNames[currentMonth]} ${currentDate.getFullYear()}`;
+                monthSection.appendChild(monthTitle);
+                
+                // Encontrar primeiro dia da semana do mês
+                const firstDayOfMonth = new Date(currentDate.getFullYear(), currentMonth, 1);
+                const lastDayOfMonth = new Date(currentDate.getFullYear(), currentMonth + 1, 0);
+                
+                // Criar grid da semana
+                const weekGrid = document.createElement('div');
+                weekGrid.className = 'week-grid';
+                
+                // Cabeçalhos dos dias
+                dayNames.forEach(day => {
+                    const header = document.createElement('div');
+                    header.className = 'day-header';
+                    header.textContent = day;
+                    weekGrid.appendChild(header);
+                });
+                
+                // Adicionar células vazias no início
+                const startDayOfWeek = firstDayOfMonth.getDay();
+                for (let i = 0; i < startDayOfWeek; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'day-cell empty-cell';
+                    weekGrid.appendChild(emptyCell);
+                }
+                
+                // Adicionar dias do mês
+                for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
+                    const date = new Date(currentDate.getFullYear(), currentMonth, day);
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    
+                    const dayOfWeek = date.getDay();
+                    if (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) {
+                        dayCell.classList.add('weekend');
+                    }
+                    
+                    const dateDiv = document.createElement('div');
+                    dateDiv.className = 'date';
+                    dateDiv.textContent = day;
+                    dateDiv.setAttribute('data-day', dayNames[dayOfWeek]);
+                    dayCell.appendChild(dateDiv);
+                    
+                    // Adicionar médico apenas se for a partir de 21/07/2025
+                    if (date >= startDate) {
+                        const doctor = getDoctorForDate(date);
+                        if (doctor) {
+                            const doctorDiv = document.createElement('div');
+                            doctorDiv.className = 'doctor';
+                            doctorDiv.textContent = doctor;
+                            dayCell.appendChild(doctorDiv);
+                        }
+                    }
+                    
+                    weekGrid.appendChild(dayCell);
+                }
+                
+                // Completar a grade com células vazias
+                const totalCells = weekGrid.children.length - 7; // Subtrair cabeçalhos
+                const remainingCells = 42 - totalCells - 7; // 6 semanas * 7 dias - células já adicionadas - cabeçalhos
+                for (let i = 0; i < remainingCells; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'day-cell empty-cell';
+                    weekGrid.appendChild(emptyCell);
+                }
+                
+                monthSection.appendChild(weekGrid);
+                container.appendChild(monthSection);
+                
+                // Avançar para o próximo mês
+                currentDate = new Date(currentDate.getFullYear(), currentMonth + 1, 1);
+            }
+        }
+
+        // Gerar calendário quando a página carregar
+        window.addEventListener('load', generateCalendar);
+    </script>
+</body>
+</html>
