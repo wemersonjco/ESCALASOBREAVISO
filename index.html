@@ -11,6 +11,111 @@
             background-color: #f5f5f5;
         }
         
+        .print-button-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .print-button {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .print-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+        
+        .print-button:active {
+            transform: translateY(0);
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                background: white;
+                font-size: 12px;
+            }
+            
+            .container {
+                max-width: none;
+                margin: 0;
+                padding: 15px;
+                box-shadow: none;
+            }
+            
+            .print-button-container {
+                display: none;
+            }
+            
+            .month-section {
+                page-break-after: always;
+                margin-bottom: 0;
+                height: calc(100vh - 30px);
+            }
+            
+            .month-section:last-child {
+                page-break-after: avoid;
+            }
+            
+            .month-title {
+                font-size: 24px;
+                margin-bottom: 15px;
+                padding: 10px;
+            }
+            
+            .week-grid {
+                margin-bottom: 0;
+                height: calc(100vh - 120px);
+            }
+            
+            .day-header {
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            .day-cell {
+                padding: 8px 6px;
+                min-height: 60px;
+                font-size: 11px;
+            }
+            
+            .date {
+                font-size: 14px;
+                margin-bottom: 3px;
+            }
+            
+            .doctor {
+                font-size: 10px;
+                padding: 2px 4px;
+                margin-top: 2px;
+            }
+            
+            .legend {
+                page-break-before: always;
+                margin-top: 0;
+                font-size: 12px;
+            }
+            
+            h1 {
+                font-size: 28px;
+                margin-bottom: 20px;
+            }
+            
+            @page {
+                size: A4 landscape;
+                margin: 15mm;
+            }
+        }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -149,6 +254,10 @@
 <body>
     <div class="container">
         <h1>Escala de Sobreaviso - Cirurgiões 2025</h1>
+        
+        <div class="print-button-container">
+            <button onclick="window.print()" class="print-button">🖨️ Imprimir Escala</button>
+        </div>
         
         <div id="schedule-container"></div>
         
